@@ -1,0 +1,313 @@
+:root {
+    --bg-color: #fff0f5; /* Lavender Blush */
+    --primary-color: #ffb6c1; /* Light Pink */
+    --accent-red: rgba(255, 105, 135, 0.8); /* Soft Red Glow */
+    --accent-green: rgba(144, 238, 144, 0.8); /* Light Green Glow */
+    --text-color: #333;
+    --carousel-height: 25vh; /* Adjust as needed */
+    --carousel-aspect-ratio: 16/10; /* Adjust aspect ratio of carousel images */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden; /* Prevent scrollbars caused by full-screen elements */
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+}
+
+#hearts-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 0;
+    overflow: hidden;
+}
+
+.heart {
+    position: absolute;
+    /* width/height set by JS */
+    background-color: var(--primary-color);
+    opacity: 0;
+    transform: translateY(105vh) rotate(-45deg); /* Start below the screen and rotated */
+    transform-origin: center center; /* Rotate around the center */
+    animation: floatUp 10s infinite ease-in;
+    /* Removed fixed border-radius here, handled by pseudo-elements */
+}
+
+.heart::before,
+.heart::after {
+    content: '';
+    position: absolute;
+    /* width/height set dynamically via JS style tag */
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+/* Heart shape using transforms on pseudo-elements (Corrected in JS) */
+/* JS will now dynamically generate styles for each heart's pseudo-elements */
+
+
+@keyframes floatUp {
+    0% {
+        /* Start rotated */
+        transform: translateY(105vh) rotate(-45deg);
+        opacity: 0;
+    }
+    10% {
+         opacity: 0.7;
+    }
+    90% {
+        opacity: 0.7;
+    }
+    100% {
+        /* End rotated, drifted slightly */
+        transform: translateY(-10vh) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+
+.main-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between; /* Pushes carousel to bottom */
+    padding-bottom: calc(var(--carousel-height) + 50px); /* Space for carousel and instructions */
+}
+
+.main-image-container {
+    width: 100%;
+    flex-grow: 1; /* Takes remaining space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Prevents image overflow */
+    padding: 20px; /* Add some padding around the main image */
+}
+
+#main-image {
+    max-width: 100%;
+    max-height: 100%; /* Ensure image fits within the allocated space */
+    object-fit: contain; /* Scale image while preserving aspect ratio */
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.25s ease-in-out; /* Add transition for smooth change */
+}
+
+
+.carousel-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(var(--carousel-height) + 50px); /* Height + space for text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Align items to bottom */
+    padding-bottom: 15px; /* Space below dots */
+    background: linear-gradient(to top, rgba(255, 240, 245, 1) 20%, rgba(255, 240, 245, 0) 100%); /* Stronger Fade background */
+    z-index: 10;
+}
+
+.carousel-instructions {
+    font-size: 0.9em;
+    color: gray;
+    margin-bottom: 10px; /* Space between text and carousel */
+    opacity: 0.8;
+}
+
+.carousel {
+    position: relative;
+    width: calc(var(--carousel-height) * var(--carousel-aspect-ratio)); /* Width based on height and aspect ratio */
+    max-width: 90%; /* Ensure it doesn't get too wide on large screens */
+    height: var(--carousel-height);
+    perspective: 1000px; /* For 3D effects if needed */
+    user-select: none; /* Prevent image selection during swipe */
+    -webkit-user-drag: none; /* Prevent image drag */
+    touch-action: pan-y; /* Allow vertical scroll, prevent horizontal */
+}
+
+.carousel-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    opacity: 0;
+    transform: translateX(100%) scale(0.8);
+    z-index: 1;
+    background-color: #eee; /* Placeholder bg */
+    cursor: grab;
+}
+.carousel-item.grabbing {
+    cursor: grabbing;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the area */
+    display: block;
+    pointer-events: none; /* Prevent image interaction during swipe */
+}
+
+.carousel-item.current {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    z-index: 3;
+}
+
+.carousel-item.prev {
+    opacity: 1;
+    transform: translateX(-100%) scale(0.8);
+    z-index: 2;
+}
+
+.carousel-item.next {
+    opacity: 1;
+    transform: translateX(100%) scale(0.8);
+    z-index: 2;
+}
+
+/* Dynamic positioning during swipe */
+.carousel-item.swiping {
+    transition: none; /* Disable transition during active swipe */
+}
+
+/* Glow Effects */
+.glow {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    pointer-events: none;
+    z-index: 5; /* Above image */
+}
+
+/* Glow Left (Green) - Shown when swiping LEFT (moving towards NEXT slide) */
+.glow.left {
+    left: 0;
+    background: linear-gradient(to right, var(--accent-green), transparent);
+}
+/* Glow Right (Red) - Shown when swiping RIGHT (moving towards PREVIOUS slide) */
+.glow.right {
+    right: 0;
+    background: linear-gradient(to left, var(--accent-red), transparent);
+}
+
+.carousel-item.glow-left .glow.left {
+    opacity: 1;
+}
+
+.carousel-item.glow-right .glow.right {
+    opacity: 1;
+}
+
+/* Dots Navigation */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px; /* Space above dots */
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    margin: 0 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none; /* Remove default button border */
+    padding: 0; /* Remove default button padding */
+}
+
+.dot:focus {
+    outline: 1px dotted var(--primary-color); /* Basic focus indicator */
+    outline-offset: 2px;
+}
+.dot:focus:not(:focus-visible) {
+  outline: none; /* Remove outline for mouse users */
+}
+
+
+.dot.active {
+    background-color: var(--primary-color);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    :root {
+        --carousel-height: 20vh;
+    }
+    .main-content {
+         padding-bottom: calc(var(--carousel-height) + 60px); /* Adjust padding */
+    }
+    #main-image {
+        border-radius: 10px;
+    }
+     .carousel {
+        max-width: 85%;
+    }
+}
+
+@media (max-width: 480px) {
+     :root {
+        --carousel-height: 18vh;
+    }
+     .main-content {
+         padding-bottom: calc(var(--carousel-height) + 70px); /* Further adjust padding */
+    }
+    .carousel {
+        max-width: 80%;
+    }
+     .carousel-instructions {
+        font-size: 0.8em;
+    }
+    /* Heart size adjusted dynamically in JS */
+}
+
+/* Style for play button */
+#play-button {
+    position: fixed;
+    top: 20px; /* Increased spacing */
+    left: 20px; /* Increased spacing */
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    padding: 10px 15px;
+    font-size: 1em;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+}
+#play-button:hover {
+    background-color: #ff9aae; /* Slightly darker pink on hover */
+}
